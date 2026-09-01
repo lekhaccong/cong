@@ -1,5 +1,5 @@
 export const APP_NAME = "CongViecPro";
-export const APP_VERSION = "1.1.0";
+export const APP_VERSION = "1.1.1";
 // v2 keeps the same schema but establishes a migration checkpoint for future updates.
 export const DB_VERSION = 2;
 export const BACKUP_VERSION = 1;
