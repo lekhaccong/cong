@@ -1,3 +1,4 @@
+import { clearNativeReminders } from "@/lib/cvp/native-notifications";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/cvp/page-header";
@@ -8,7 +9,7 @@ import { getDb, resetDatabase } from "@/lib/cvp/db";
 import { useAppStore } from "@/lib/cvp/store";
 import { applyCurrentUser, applyShift, wipeSample } from "@/lib/cvp/init";
 import { persistSetting } from "@/lib/cvp/repo";
-import { requestNotifyPermission } from "@/lib/cvp/reminders";
+import { requestNotifyPermission, sendTestNotification } from "@/lib/cvp/reminders";
 import { ROLE_LABEL, APP_VERSION } from "@/lib/cvp/types";
 import { can } from "@/lib/cvp/permissions";
 
@@ -86,13 +87,19 @@ function SettingsPage() {
           variant="secondary"
           className="w-full"
           onClick={async () => {
+            try {
             const ok = await requestNotifyPermission();
-            toast[ok ? "success" : "error"](ok ? "Đã bật thông báo" : "Chưa cấp quyền thông báo");
+            toast[ok ? "success" : "error"](ok ? "Đã bật thông báo" : "Hãy bật quyền thông báo trong Cài đặt điện thoại → Ứng dụng → CongViecPro.");
+            } catch { toast.error("Không bật được thông báo. Hãy kiểm tra cài đặt điện thoại."); }
           }}
         >
-          Bật thông báo trình duyệt
+          Bật thông báo
         </Button>
-        <p className="text-xs text-muted">Nhắc việc đến hạn, DATA thiếu, lot chưa chốt — chạy cả khi đang ở màn khác.</p>
+        <Button variant="secondary" className="w-full" onClick={async () => {
+          try { await sendTestNotification(); toast.success("Đã gửi thử. Trên Android, về màn hình chính và chờ khoảng 10 giây."); }
+          catch (error) { toast.error(error instanceof Error ? error.message : "Không gửi được thông báo thử"); }
+        }}>Gửi thông báo thử</Button>
+        <p className="text-xs text-muted">Android nhắc công việc trước hạn 30 phút và khi đến hạn kể cả khi rời app. DATA thiếu và lot chưa chốt được kiểm tra khi app mở. Thông báo có thể chậm nếu máy tiết kiệm pin; buộc dừng app sẽ ngừng nhắc cho đến khi mở lại.</p>
       </section>
       <section className="space-y-3 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)]">
         <h2 className="font-medium">Dữ liệu</h2>
@@ -122,6 +129,7 @@ function SettingsPage() {
                 toast.error("Đã hủy Reset");
                 return;
               }
+              await clearNativeReminders();
               await resetDatabase();
               window.location.reload();
             }}

@@ -93,7 +93,9 @@ export async function exportBackup(modules: ModuleKey[]): Promise<Blob> {
 
   for (const key of modules) {
     if (key === "blobs") continue;
-    const rows = await tableOf(db, key).toArray();
+    const allRows = await tableOf(db, key).toArray();
+    // Safety ZIP references only belong to this device, not the exported archive.
+    const rows = key === "settings" ? allRows.filter((row) => !row.key?.startsWith("autobackup:") && row.key !== "lastAutoBackupBlobId") : allRows;
     payload[key] = rows;
     zip.file(TABLE_FILE[key], JSON.stringify(rows));
   }
@@ -206,12 +208,14 @@ export async function restoreBackup(
     await db.settings.delete(item.key);
   }
 
+  const safetySettings = (await db.settings.toArray()).filter((s) => s.key.startsWith("autobackup:") || s.key === "lastAutoBackupBlobId");
   await db.transaction("rw", db.tables, async () => {
     for (const key of selected) {
       if (key === "blobs") continue;
       const f = preview.zip.file(TABLE_FILE[key]);
       if (!f) continue;
-      const rows = JSON.parse(await f.async("string")) as Array<{ id: string }>;
+      const imported = JSON.parse(await f.async("string")) as Array<{ id: string; key?: string }>;
+      const rows = key === "settings" ? imported.filter((row) => !row.key?.startsWith("autobackup:") && row.key !== "lastAutoBackupBlobId") : imported;
       const table = tableOf(db, key);
       if (mode === "overwrite") {
         await table.clear();
@@ -226,6 +230,7 @@ export async function restoreBackup(
         }
       }
     }
+    await db.settings.bulkPut(safetySettings);
   });
 
   if (selected.includes("blobs") || selected.includes("photos")) {
@@ -266,5 +271,6 @@ export function backupFilename(date = new Date()): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
-  return `congviecpro_backup_${y}-${m}-${d}.zip`;
+  const time = [date.getHours(), date.getMinutes(), date.getSeconds()].map((n) => String(n).padStart(2, "0")).join("-");
+  return `congviecpro_backup_${y}-${m}-${d}_${time}_${date.getMilliseconds()}.zip`;
 }
