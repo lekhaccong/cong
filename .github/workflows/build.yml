@@ -1,0 +1,86 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  web:
+    name: Test & web build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: node scripts/validate-project.mjs
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+      - uses: actions/upload-artifact@v6
+        with:
+          name: congviecpro-web
+          path: |
+            dist
+            .output
+            .vercel/output
+          if-no-files-found: ignore
+
+  apk:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+
+      - run: npm ci
+      - run: node scripts/validate-project.mjs
+
+      - name: Build static web for Capacitor
+        run: npm run build:native
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Capacitor Android project
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+          npx cap sync android
+          node scripts/patch-android.mjs
+
+      - name: Assemble debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Collect APK
+        run: |
+          mkdir -p artifacts
+          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -n 1)
+          if [ -z "$APK" ]; then
+            echo "No APK produced" >&2
+            find android/app/build -type f | head -100
+            exit 1
+          fi
+          cp "$APK" artifacts/CongViecPro.apk
+          ls -lh artifacts/CongViecPro.apk
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: CongViecPro-apk
+          path: artifacts/CongViecPro.apk
+          if-no-files-found: error
