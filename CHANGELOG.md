@@ -1,5 +1,15 @@
 # Changelog
 
+## LAN 0.1.0 — 2026-09-02 (bản thử nghiệm tại nhà)
+
+- Máy chủ Node.js 24 + SQLite, thiết lập Admin tại máy chủ; tạo/khóa User và đổi mật khẩu.
+- Giao việc, báo cáo số lượng/ảnh/lý do vướng, duyệt hoặc trả lại, nhật ký và thông báo trên trang đang mở.
+- Nhập XLSX có ghép cột và xem trước; giao dịch toàn bộ lô, chống trùng mã.
+- Sao lưu đầy đủ gồm ảnh, khôi phục có bản giữ lại và hủy phiên cũ.
+- Module Hệ thống nội bộ mở giao diện máy chủ trong trình duyệt; giữ chế độ cá nhân.
+- HTTP chỉ dành dữ liệu giả trên mạng nhà. Chưa xác minh Windows/Android thật.
+
+
 ## v1.1.1 — 2026-09-01
 
 - Android: Lưu backup bằng hộp chọn nơi lưu của hệ thống; chỉ báo thành công sau khi ghi file. Tách nút Chia sẻ, xử lý hủy và lỗi.

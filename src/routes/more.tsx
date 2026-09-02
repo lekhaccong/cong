@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/cvp/page-header";
 export const Route = createFileRoute("/more")({ component: MorePage });
 
 const ITEMS = [
+  { to: "/lan", label: "Hệ thống nội bộ", desc: "Kết nối máy chủ Windows, giao việc và báo cáo", icon: Users },
   { to: "/people", label: "Nhân sự", desc: "Danh sách, nhóm, ca", icon: Users },
   { to: "/attendance", label: "Chấm công", desc: "Vào / ra / nghỉ", icon: CalendarCheck },
   { to: "/tasks", label: "Công việc", desc: "Khối, checklist, tiến độ", icon: ClipboardList },
