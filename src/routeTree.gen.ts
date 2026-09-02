@@ -15,6 +15,7 @@ import { Route as AttendanceRouteImport } from './routes/attendance'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as GoodsRouteImport } from './routes/goods'
 import { Route as HandoverRouteImport } from './routes/handover'
+import { Route as LanRouteImport } from './routes/lan'
 import { Route as MailRouteImport } from './routes/mail'
 import { Route as MoreRouteImport } from './routes/more'
 import { Route as OtRouteImport } from './routes/ot'
@@ -66,6 +67,11 @@ const GoodsRoute = GoodsRouteImport.update({
 const HandoverRoute = HandoverRouteImport.update({
   id: '/handover',
   path: '/handover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LanRoute = LanRouteImport.update({
+  id: '/lan',
+  path: '/lan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MailRoute = MailRouteImport.update({
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/backup': typeof BackupRoute
   '/goods': typeof GoodsRouteWithChildren
   '/handover': typeof HandoverRoute
+  '/lan': typeof LanRoute
   '/mail': typeof MailRoute
   '/more': typeof MoreRoute
   '/ot': typeof OtRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
   '/handover': typeof HandoverRoute
+  '/lan': typeof LanRoute
   '/mail': typeof MailRoute
   '/more': typeof MoreRoute
   '/ot': typeof OtRoute
@@ -243,6 +251,7 @@ export interface FileRoutesById {
   '/backup': typeof BackupRoute
   '/goods': typeof GoodsRouteWithChildren
   '/handover': typeof HandoverRoute
+  '/lan': typeof LanRoute
   '/mail': typeof MailRoute
   '/more': typeof MoreRoute
   '/ot': typeof OtRoute
@@ -275,6 +284,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/goods'
     | '/handover'
+    | '/lan'
     | '/mail'
     | '/more'
     | '/ot'
@@ -303,6 +313,7 @@ export interface FileRouteTypes {
     | '/attendance'
     | '/backup'
     | '/handover'
+    | '/lan'
     | '/mail'
     | '/more'
     | '/ot'
@@ -331,6 +342,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/goods'
     | '/handover'
+    | '/lan'
     | '/mail'
     | '/more'
     | '/ot'
@@ -362,6 +374,7 @@ export interface RootRouteChildren {
   BackupRoute: typeof BackupRoute
   GoodsRoute: typeof GoodsRouteWithChildren
   HandoverRoute: typeof HandoverRoute
+  LanRoute: typeof LanRoute
   MailRoute: typeof MailRoute
   MoreRoute: typeof MoreRoute
   OtRoute: typeof OtRoute
@@ -418,6 +431,13 @@ declare module '@tanstack/react-router' {
       path: '/handover'
       fullPath: '/handover'
       preLoaderRoute: typeof HandoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lan': {
+      id: '/lan'
+      path: '/lan'
+      fullPath: '/lan'
+      preLoaderRoute: typeof LanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mail': {
@@ -639,6 +659,7 @@ const rootRouteChildren: RootRouteChildren = {
   BackupRoute: BackupRoute,
   GoodsRoute: GoodsRouteWithChildren,
   HandoverRoute: HandoverRoute,
+  LanRoute: LanRoute,
   MailRoute: MailRoute,
   MoreRoute: MoreRoute,
   OtRoute: OtRoute,
